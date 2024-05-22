@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: postgres-test
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reservationservicetestdb
+    restart: unless-stopped
+    healthcheck:
+      test: 'exit 0'
+
+  reservation-service-test:
+    image: maven:3.8.5-openjdk-17
+    container_name: reservation-service-quarkus-test
+    volumes:
+      - .:/workspace
+      - ${HOME}/.m2/root/.m2
+    environment:
+      - POSTGRESQL_HOST=postgres-test
+      - POSTGRESQL_PORT=5432
+      - POSTGRESQL_DB=reservationservicetestdb
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_PASSWORD=postgres
+    working_dir: /workspace
+    depends_on:
+      - db
+    command: mvn clean test
