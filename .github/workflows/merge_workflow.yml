@@ -2,7 +2,7 @@ name: 'Merge workflow'
 on:
   push:
     branches:
-      - 'main'
+      - 'feature/workflow-setup'
       - 'develop'
 
 concurrency:
