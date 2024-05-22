@@ -1,5 +1,6 @@
 package uns.ac.rs.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uns.ac.rs.dto.request.ReservationRequestDTO;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
+@Transactional
 public class ReservationService {
 
     @Autowired

@@ -65,6 +65,10 @@ public class ReservationController {
     @GET
     @Path("/active-reservations")
     @RolesAllowed("guest")
+    /*
+    An active reservation is either the one that has been accepted, but it is still more than 24h before it starts OR
+    the one that has been sent and is still waiting for response.
+     */
     public Response getActiveReservations(@HeaderParam("Authorization") String authorizationHeader) {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 "http://localhost:8001/user-service/auth/authorize/guest",
@@ -98,7 +102,7 @@ public class ReservationController {
         if (userEmail.equals("")) {
             return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
         }
-        Reservation reservation = reservationService.changeReservationStatus(reservationId, ReservationStatus.ACCEPTED);
+        Reservation reservation = reservationService.changeReservationStatus(reservationId, ReservationStatus.CANCELLED);
         return Response
                 .status(Response.Status.OK)
                 .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully cancelled an active reservation"))
