@@ -3,11 +3,11 @@ FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-17 AS build
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
+COPY src /code/src
 
 WORKDIR /code
 RUN chmod +x ./mvnw
 RUN ./mvnw -B quarkus:3.9.3:go-offline
-COPY src /code/src
 RUN ./mvnw package -Dnative -DskipTests
 
 ## Stage 2 : create the docker final image
