@@ -73,7 +73,7 @@ jobs:
 
   push-service-to-dockerhub:
     name: Push Service Docker Image to Docker Registry
-    needs: [tests, versioning]
+    needs: [versioning]
     runs-on: ubuntu-latest
 
     steps:
