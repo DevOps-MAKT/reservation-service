@@ -1,0 +1,22 @@
+## Stage 1 : build with maven builder image with native capabilities
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-17 AS build
+COPY --chown=quarkus:quarkus mvnw /code/mvnw
+COPY --chown=quarkus:quarkus .mvn /code/.mvn
+COPY --chown=quarkus:quarkus pom.xml /code/
+
+WORKDIR /code
+RUN chmod +x ./mvnw
+RUN ./mvnw -B quarkus:3.9.3:go-offline
+COPY src /code/src
+RUN ./mvnw package -Dnative -DskipTests
+
+## Stage 2 : create the docker final image
+FROM quay.io/quarkus/quarkus-micro-image:2.0
+WORKDIR /work/
+COPY --from=build /code/target/*-runner /work/application
+COPY --from=build /code/target/classes/import.sql /work/import.sql
+
+
+EXPOSE 8003
+
+CMD ["/work/application", "-Dquarkus.http.host=0.0.0.0"]
