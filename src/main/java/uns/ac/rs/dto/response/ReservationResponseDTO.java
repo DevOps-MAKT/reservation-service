@@ -8,20 +8,14 @@ import uns.ac.rs.model.ReservationStatus;
 public class ReservationResponseDTO {
 
     private long id;
-
     private long accommodationId;
-
     private String hostEmail;
-
     private String guestEmail;
-
     private long startDate;
-
     private long endDate;
-
     private int noGuests;
-
     private ReservationStatus status;
+    private int noCancellations;
 
     public ReservationResponseDTO() {
 
@@ -36,5 +30,17 @@ public class ReservationResponseDTO {
         this.endDate = reservation.getEndDate();
         this.noGuests = reservation.getNoGuests();
         this.status = reservation.getStatus();
+    }
+
+    public ReservationResponseDTO(Reservation reservation, int noCancellations) {
+        this.id = reservation.getId();
+        this.accommodationId = reservation.getAccommodationId();
+        this.hostEmail = reservation.getHostEmail();
+        this.guestEmail = reservation.getGuestEmail();
+        this.startDate = reservation.getStartDate();
+        this.endDate = reservation.getEndDate();
+        this.noGuests = reservation.getNoGuests();
+        this.status = reservation.getStatus();
+        this.noCancellations = noCancellations;
     }
 }
