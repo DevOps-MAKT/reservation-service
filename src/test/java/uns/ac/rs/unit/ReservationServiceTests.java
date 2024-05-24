@@ -98,4 +98,40 @@ public class ReservationServiceTests {
 
         assertEquals(activeReservations.size(), 1);
     }
+
+    @Test
+    public void rejectReservation() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setAccommodationId(1L);
+        reservation.setStartDate(1735686000000L); // 1.1.2025.
+        reservation.setEndDate(1736290800000L); // 8.1.2025.
+        reservation.setHostEmail("host@gmail.com");
+        reservation.setNoGuests(5);
+        reservation.setStatus(ReservationStatus.SENT);
+
+        when(reservationRepository.findById(1L)).thenReturn(reservation);
+
+        Reservation updatedReservation = reservationService.rejectReservation(1L);
+
+        assertEquals(updatedReservation.getStatus(), ReservationStatus.REJECTED);
+    }
+
+    @Test
+    public void acceptReservation() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setAccommodationId(1L);
+        reservation.setStartDate(1735686000000L); // 1.1.2025.
+        reservation.setEndDate(1736290800000L); // 8.1.2025.
+        reservation.setHostEmail("host@gmail.com");
+        reservation.setNoGuests(5);
+        reservation.setStatus(ReservationStatus.SENT);
+
+        when(reservationRepository.findById(1L)).thenReturn(reservation);
+
+        Reservation updatedReservation = reservationService.acceptReservation(1L);
+
+        assertEquals(updatedReservation.getStatus(), ReservationStatus.ACCEPTED);
+    }
 }

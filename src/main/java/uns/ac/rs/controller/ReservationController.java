@@ -1,5 +1,6 @@
 package uns.ac.rs.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.*;
@@ -103,10 +104,110 @@ public class ReservationController {
             return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
         }
         Reservation reservation = reservationService.changeReservationStatus(reservationId, ReservationStatus.CANCELLED);
+        GeneralResponse noCancellations = microserviceCommunicator.processResponse(
+                "http://localhost:8001/user-service/user/append-cancellation",
+                "PATCH",
+                authorizationHeader);
         return Response
                 .status(Response.Status.OK)
                 .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully cancelled an active reservation"))
                 .build();
     }
+
+    @GET
+    @Path("/requested-reservations")
+    @RolesAllowed("host")
+    public Response getAllRequestedReservations(@HeaderParam("Authorization") String authorizationHeader) {
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8001/user-service/auth/authorize/host",
+                "GET",
+                authorizationHeader);
+        String userEmail = (String) response.getData();
+        if (userEmail.equals("")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+        }
+        List<Reservation> requestedReservations = reservationService.getRequestedReservations(userEmail);
+        List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
+        for (Reservation requestedReservation: requestedReservations) {
+            GeneralResponse noCancellations = microserviceCommunicator.processResponse(
+                    "http://localhost:8001/user-service/user/no-cancellations/" + requestedReservation.getGuestEmail(),
+                    "GET",
+                    authorizationHeader);
+            reservationResponseDTOS.add(new ReservationResponseDTO(requestedReservation, (int) noCancellations.getData()));
+        }
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(reservationResponseDTOS, "Successfully retrieved requested reservations"))
+                .build();
+    }
+
+    @PATCH
+    @Path("/{reservation_id}/reject")
+    @RolesAllowed("host")
+    public Response reject(@HeaderParam("Authorization") String authorizationHeader,
+                               @PathParam("reservation_id") long reservationId) {
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8001/user-service/auth/authorize/host",
+                "GET",
+                authorizationHeader);
+        String userEmail = (String) response.getData();
+        if (userEmail.equals("")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+        }
+
+        Reservation reservation = reservationService.rejectReservation(reservationId);
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully rejected reservation"))
+                .build();
+    }
+
+    @PATCH
+    @Path("/{reservation_id}/accept")
+    @RolesAllowed("host")
+    public Response accept(@HeaderParam("Authorization") String authorizationHeader,
+                           @PathParam("reservation_id") long reservationId) {
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8001/user-service/auth/authorize/host",
+                "GET",
+                authorizationHeader);
+        String userEmail = (String) response.getData();
+        if (userEmail.equals("")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+        }
+
+        Reservation reservation = reservationService.acceptReservation(reservationId);
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully accepted reservation"))
+                .build();
+    }
+
+    @GET
+    @Path("/{accommodation_id}")
+    @PermitAll
+    public Response getReservationsForAccommodation(@HeaderParam("Authorization") String authorizationHeader,
+                                                    @PathParam("accommodation_id") long accommodationId) {
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                "http://localhost:8001/user-service/auth/authorize/host",
+                "GET",
+                authorizationHeader);
+        String userEmail = (String) response.getData();
+        if (userEmail.equals("")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+        }
+        List<Reservation> reservations = reservationService.findReservationsBasedOnAccommodation(accommodationId);
+        List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
+        for (Reservation reservation: reservations) {
+            reservationResponseDTOS.add(new ReservationResponseDTO(reservation));
+        }
+
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(reservationResponseDTOS, "Successfully retrieved reservation for accommodation"))
+                .build();
+
+    }
+
 
 }

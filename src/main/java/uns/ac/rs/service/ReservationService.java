@@ -44,4 +44,55 @@ public class ReservationService {
         }
         return activeReservations;
     }
+
+    public List<Reservation> getRequestedReservations(String hostEmail) {
+        return reservationRepository.findByHostEmailAndStatus(hostEmail, ReservationStatus.SENT);
+    }
+
+    public Reservation rejectReservation(long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId);
+        reservation.setStatus(ReservationStatus.REJECTED);
+        reservationRepository.persist(reservation);
+        return reservation;
+    }
+
+    public Reservation acceptReservation(long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId);
+        reservation.setStatus(ReservationStatus.ACCEPTED);
+        reservationRepository.persist(reservation);
+        rejectSentReservationsInSamePeriod(reservation);
+        return reservation;
+    }
+
+    public List<Reservation> findReservationsBasedOnAccommodation(long accommodationId) {
+        return reservationRepository.findByAccommodationIdAndStatus(accommodationId,
+                ReservationStatus.ACCEPTED);
+    }
+
+    private void rejectSentReservationsInSamePeriod(Reservation reservation) {
+        List<Reservation> reservations = reservationRepository.findByAccommodationIdAndStatus(reservation.getAccommodationId(), ReservationStatus.SENT);
+        for (Reservation sentReservation: reservations) {
+            if (isDateInRange(sentReservation.getStartDate(),
+                    reservation.getStartDate(),
+                    reservation.getEndDate())
+            || isDateInRange(sentReservation.getEndDate(),
+                    reservation.getStartDate(),
+                    reservation.getEndDate())
+            || areDatesContainingOriginalDates(sentReservation.getStartDate(),
+                    sentReservation.getEndDate(),
+                    reservation.getStartDate(),
+                    reservation.getEndDate())) {
+                sentReservation.setStatus(ReservationStatus.REJECTED);
+                reservationRepository.persist(sentReservation);
+            }
+        }
+    }
+
+    private boolean isDateInRange(long date, long startDate, long endDate) {
+        return date >= startDate && date <= endDate;
+    }
+
+    private boolean areDatesContainingOriginalDates(long startDate, long endDate, long originalStartDate, long originalEndDate) {
+        return startDate <= originalStartDate && endDate >= originalEndDate;
+    }
 }
