@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,7 +91,11 @@ public class ReservationServiceTests {
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
 
-        when(reservationRepository.findByGuestEmailAndStatus("guest@gmail.com", ReservationStatus.SENT, ReservationStatus.ACCEPTED))
+        when(reservationRepository.findByGuestEmailAndStatusAndEndDate(
+                eq("guest@gmail.com"),
+                eq(ReservationStatus.SENT),
+                eq(ReservationStatus.ACCEPTED),
+                anyLong()))
                 .thenReturn(reservations);
 
         List<Reservation> activeReservations = reservationService.getActiveReservations("guest@gmail.com");
@@ -134,4 +139,31 @@ public class ReservationServiceTests {
 
         assertEquals(updatedReservation.getStatus(), ReservationStatus.ACCEPTED);
     }
+
+    @Test
+    public void testDoActiveReservationsExist() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        reservation.setAccommodationId(1L);
+        reservation.setStartDate(1735686000000L); // 1.1.2025.
+        reservation.setEndDate(1736290800000L); // 8.1.2025.
+        reservation.setHostEmail("host@gmail.com");
+        reservation.setNoGuests(5);
+        reservation.setStatus(ReservationStatus.SENT);
+
+        List<Reservation> reservations = new ArrayList<>();
+        reservations.add(reservation);
+
+        when(reservationRepository.findByHostEmailAndStatusAndEndDate(
+                eq("host@gmail.com"),
+                eq(ReservationStatus.SENT),
+                eq(ReservationStatus.ACCEPTED),
+                anyLong()))
+                .thenReturn(reservations);
+
+        boolean doActiveReservationsExist = reservationService.doActiveReservationsExist("host@gmail.com");
+
+        assertTrue(doActiveReservationsExist);
+    }
+
 }

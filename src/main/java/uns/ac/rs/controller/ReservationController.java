@@ -209,5 +209,41 @@ public class ReservationController {
 
     }
 
+    @GET
+    @Path("/are-reservations-active/{email}")
+    @RolesAllowed("guest")
+    public Response areReservationsActive(@HeaderParam("Authorization") String authorizationHeader,
+                                          @PathParam("email") String email) {
+        boolean areReservationsActive = true;
+        List<Reservation> reservations = reservationService.getActiveReservations(email);
+        if (reservations.size() == 0) {
+            areReservationsActive = false;
+        }
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(areReservationsActive, "Successfully retrieved if reservations are active"))
+                .build();
+    }
+
+    @GET
+    @Path("/do-active-reservations-exist/{email}")
+    @RolesAllowed("host")
+    public Response doActiveReservationsExist(@HeaderParam("Authorization") String authorizationHeader,
+                                          @PathParam("email") String email) {
+
+        boolean doActiveReservationsExist  = reservationService.doActiveReservationsExist(email);
+        if (doActiveReservationsExist) {
+            return Response
+                    .ok()
+                    .entity(new GeneralResponse<>(true, "There are currently active reservations"))
+                    .build();
+        }
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(false, "There are currently no active reservations"))
+                .build();
+    }
+
+
 
 }
