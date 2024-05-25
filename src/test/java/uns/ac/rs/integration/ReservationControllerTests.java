@@ -45,6 +45,14 @@ public class ReservationControllerTests {
     @TestHTTPResource("2/reject")
     URL rejectRequestEndpoint;
 
+    @TestHTTPEndpoint(ReservationController.class)
+    @TestHTTPResource("are-reservations-active/guest@gmail.com")
+    URL areReservationsActiveEndpoint;
+
+    @TestHTTPEndpoint(ReservationController.class)
+    @TestHTTPResource("do-active-reservations-exist/host@gmail.com")
+    URL doActiveReservationsExistEndpoint;
+
     @InjectMock
     private MicroserviceCommunicator microserviceCommunicator;
 
@@ -373,5 +381,33 @@ public class ReservationControllerTests {
                 .statusCode(200)
                 .body("data.size()", equalTo(0))
                 .body("message", equalTo("Successfully retrieved requested reservations"));
+    }
+
+    @Test
+    @Order(10)
+    public void whenThereAreActiveReservations_thenReturnTrue() {
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer good-jwt")
+        .when()
+                .get(areReservationsActiveEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(true))
+                .body("message", equalTo("Successfully retrieved if reservations are active"));
+    }
+
+    @Test
+    @Order(11)
+    public void whenThereAreActiveHostReservations_thenReturnTrue() {
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer good-jwt")
+        .when()
+                .get(doActiveReservationsExistEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data", equalTo(true))
+                .body("message", equalTo("There are currently active reservations"));
     }
 }

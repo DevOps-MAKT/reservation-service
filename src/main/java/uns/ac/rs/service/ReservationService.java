@@ -32,9 +32,12 @@ public class ReservationService {
     }
 
     public List<Reservation> getActiveReservations(String guestEmail) {
-        List<Reservation> activeReservations = reservationRepository
-                .findByGuestEmailAndStatus(guestEmail, ReservationStatus.SENT, ReservationStatus.ACCEPTED);
         long todaysMiliseconds = Instant.now().toEpochMilli();
+        List<Reservation> activeReservations = reservationRepository
+                .findByGuestEmailAndStatusAndEndDate(guestEmail,
+                        ReservationStatus.SENT,
+                        ReservationStatus.ACCEPTED,
+                        todaysMiliseconds);
         long dayMiliseconds = 24*60*60*1000;
         for (Reservation activeReservation: activeReservations) {
             if (activeReservation.isCanBeCancelled() && Math.abs(todaysMiliseconds - activeReservation.getStartDate()) <= dayMiliseconds) {
@@ -67,6 +70,12 @@ public class ReservationService {
     public List<Reservation> findReservationsBasedOnAccommodation(long accommodationId) {
         return reservationRepository.findByAccommodationIdAndStatus(accommodationId,
                 ReservationStatus.ACCEPTED);
+    }
+
+    public boolean doActiveReservationsExist(String email) {
+        long todaysMiliseconds = Instant.now().toEpochMilli();
+        List<Reservation> hostsReservations = reservationRepository.findByHostEmailAndStatusAndEndDate(email, ReservationStatus.SENT, ReservationStatus.ACCEPTED, todaysMiliseconds);
+        return hostsReservations.size() != 0;
     }
 
     private void rejectSentReservationsInSamePeriod(Reservation reservation) {
