@@ -14,8 +14,7 @@ import uns.ac.rs.service.ReservationService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,6 +163,29 @@ public class ReservationServiceTests {
         boolean doActiveReservationsExist = reservationService.doActiveReservationsExist("host@gmail.com");
 
         assertTrue(doActiveReservationsExist);
+    }
+
+    @Test
+    public void testRetrieveReservationAccommodations() {
+        String guestEmail = "guest@example.com";
+        Reservation reservation1 = new Reservation();
+        reservation1.setId(1L);
+        reservation1.setAccommodationId(1L);
+        Reservation reservation2 = new Reservation();
+        reservation2.setId(2L);
+        reservation2.setAccommodationId(2L);
+        Reservation reservation3 = new Reservation();
+        reservation3.setId(3L);
+        reservation3.setAccommodationId(1L); // Repeated accommodationId
+        when(reservationRepository.findByGuestEmailAndStatus(guestEmail, ReservationStatus.ACCEPTED))
+                .thenReturn(List.of(reservation1, reservation2, reservation3));
+
+        List<Long> accommodationIds = reservationService.retrieveReservationAccommodations(guestEmail);
+
+        assertNotNull(accommodationIds);
+        assertEquals(2, accommodationIds.size());
+        assertTrue(accommodationIds.contains(1L));
+        assertTrue(accommodationIds.contains(2L));
     }
 
 }

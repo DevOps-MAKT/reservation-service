@@ -255,6 +255,15 @@ public class ReservationController {
                 .build();
     }
 
-
+    @GET
+    @Path("/retrieve-reservation-accommodations/{guest_email}")
+    @RolesAllowed("guest")
+    public Response retrieveReservationAccommodations(@PathParam("guest_email") String guestEmail) {
+        List<Long> accommodationIds = reservationService.retrieveReservationAccommodations(guestEmail);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(accommodationIds, "Successfully retrieved unique accommodations"))
+                .build();
+    }
 
 }

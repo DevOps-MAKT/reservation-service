@@ -57,6 +57,10 @@ public class ReservationControllerTests {
     @TestHTTPResource("retrieve-reservation-hosts/guest@gmail.com")
     URL retrieveReservationHostsEndpoint;
 
+    @TestHTTPEndpoint(ReservationController.class)
+    @TestHTTPResource("retrieve-reservation-accommodations/guest@gmail.com")
+    URL retrieveReservationAccommodationsEndpoint;
+
     @InjectMock
     private MicroserviceCommunicator microserviceCommunicator;
 
@@ -427,5 +431,19 @@ public class ReservationControllerTests {
                 .statusCode(200)
                 .body("data.size()", equalTo(1))
                 .body("message", equalTo("Successfully retrieved unique hosts"));
+    }
+
+    @Test
+    @Order(13)
+    public void whenRetrieveReservationForAnAccommodation_thenReturnFoundReservations() {
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer good-jwt")
+        .when()
+                .get(retrieveReservationAccommodationsEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.size()", equalTo(1))
+                .body("message", equalTo("Successfully retrieved unique accommodations"));
     }
 }
