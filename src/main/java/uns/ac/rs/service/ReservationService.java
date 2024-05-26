@@ -1,6 +1,7 @@
 package uns.ac.rs.service;
 
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uns.ac.rs.dto.request.ReservationRequestDTO;
@@ -9,6 +10,7 @@ import uns.ac.rs.model.ReservationStatus;
 import uns.ac.rs.repository.ReservationRepository;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -76,6 +78,17 @@ public class ReservationService {
         long todaysMiliseconds = Instant.now().toEpochMilli();
         List<Reservation> hostsReservations = reservationRepository.findByHostEmailAndStatusAndEndDate(email, ReservationStatus.SENT, ReservationStatus.ACCEPTED, todaysMiliseconds);
         return hostsReservations.size() != 0;
+    }
+
+    public List<String> retrieveReservationHosts(String guestEmail) {
+        List<String> hostEmails = new ArrayList<>();
+        List<Reservation> reservations = reservationRepository.findByGuestEmailAndStatus(guestEmail, ReservationStatus.ACCEPTED);
+        for (Reservation reservation: reservations) {
+            if (!hostEmails.contains(reservation.getHostEmail())) {
+                hostEmails.add(reservation.getHostEmail());
+            }
+        }
+        return hostEmails;
     }
 
     private void rejectSentReservationsInSamePeriod(Reservation reservation) {
