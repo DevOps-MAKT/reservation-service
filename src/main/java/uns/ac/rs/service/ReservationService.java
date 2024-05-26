@@ -91,6 +91,17 @@ public class ReservationService {
         return hostEmails;
     }
 
+    public List<Long> retrieveReservationAccommodations(String guestEmail) {
+        List<Long> accommodationIds = new ArrayList<>();
+        List<Reservation> reservations = reservationRepository.findByGuestEmailAndStatus(guestEmail, ReservationStatus.ACCEPTED);
+        for (Reservation reservation: reservations) {
+            if (!accommodationIds.contains(reservation.getAccommodationId())) {
+                accommodationIds.add(reservation.getAccommodationId());
+            }
+        }
+        return accommodationIds;
+    }
+
     private void rejectSentReservationsInSamePeriod(Reservation reservation) {
         List<Reservation> reservations = reservationRepository.findByAccommodationIdAndStatus(reservation.getAccommodationId(), ReservationStatus.SENT);
         for (Reservation sentReservation: reservations) {
