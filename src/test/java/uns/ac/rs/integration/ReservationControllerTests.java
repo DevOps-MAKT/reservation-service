@@ -53,6 +53,10 @@ public class ReservationControllerTests {
     @TestHTTPResource("do-active-reservations-exist/host@gmail.com")
     URL doActiveReservationsExistEndpoint;
 
+    @TestHTTPEndpoint(ReservationController.class)
+    @TestHTTPResource("retrieve-reservation-hosts/guest@gmail.com")
+    URL retrieveReservationHostsEndpoint;
+
     @InjectMock
     private MicroserviceCommunicator microserviceCommunicator;
 
@@ -409,5 +413,19 @@ public class ReservationControllerTests {
                 .statusCode(200)
                 .body("data", equalTo(true))
                 .body("message", equalTo("There are currently active reservations"));
+    }
+
+    @Test
+    @Order(12)
+    public void whenRetrieveReservationForAHost_thenReturnFoundReservations() {
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer good-jwt")
+        .when()
+                .get(retrieveReservationHostsEndpoint)
+        .then()
+                .statusCode(200)
+                .body("data.size()", equalTo(1))
+                .body("message", equalTo("Successfully retrieved unique hosts"));
     }
 }

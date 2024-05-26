@@ -25,4 +25,8 @@ public class ReservationRepository implements PanacheRepository<Reservation> {
     public List<Reservation> findByHostEmailAndStatusAndEndDate(String hostEmail, ReservationStatus status1, ReservationStatus status2, long endDate) {
         return list("hostEmail = ?1 and (status = ?2 or status = ?3) and endDate > ?4", hostEmail, status1, status2, endDate);
     }
+
+    public List<Reservation> findByGuestEmailAndStatus(String guestEmail, ReservationStatus status) {
+        return list("guestEmail = ?1 and status = ?2", guestEmail, status);
+    }
 }

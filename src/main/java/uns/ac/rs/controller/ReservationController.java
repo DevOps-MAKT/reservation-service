@@ -244,6 +244,17 @@ public class ReservationController {
                 .build();
     }
 
+    @GET
+    @Path("/retrieve-reservation-hosts/{guest_email}")
+    @RolesAllowed("guest")
+    public Response retrieveReservationHosts(@PathParam("guest_email") String guestEmail) {
+        List<String> hostEmails = reservationService.retrieveReservationHosts(guestEmail);
+        return Response
+                .ok()
+                .entity(new GeneralResponse<>(hostEmails, "Successfully retrieved unique hosts"))
+                .build();
+    }
+
 
 
 }
