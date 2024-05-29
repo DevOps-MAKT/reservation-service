@@ -106,7 +106,7 @@ public class ReservationController {
         Reservation reservation = reservationService.changeReservationStatus(reservationId, ReservationStatus.CANCELLED);
         GeneralResponse noCancellations = microserviceCommunicator.processResponse(
                 "http://localhost:8001/user-service/user/append-cancellation",
-                "PATCH",
+                "GET",
                 authorizationHeader);
         return Response
                 .status(Response.Status.OK)
