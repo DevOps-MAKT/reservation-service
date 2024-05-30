@@ -186,16 +186,7 @@ public class ReservationController {
     @GET
     @Path("/{accommodation_id}")
     @PermitAll
-    public Response getReservationsForAccommodation(@HeaderParam("Authorization") String authorizationHeader,
-                                                    @PathParam("accommodation_id") long accommodationId) {
-        GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/host",
-                "GET",
-                authorizationHeader);
-        String userEmail = (String) response.getData();
-        if (userEmail.equals("")) {
-            return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
-        }
+    public Response getReservationsForAccommodation(@PathParam("accommodation_id") long accommodationId) {
         List<Reservation> reservations = reservationService.findReservationsBasedOnAccommodation(accommodationId);
         List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
         for (Reservation reservation: reservations) {
