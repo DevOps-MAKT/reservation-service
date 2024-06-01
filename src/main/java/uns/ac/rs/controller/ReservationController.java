@@ -1,5 +1,6 @@
 package uns.ac.rs.controller;
 
+import uns.ac.rs.config.IntegrationConfig;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
@@ -30,13 +31,16 @@ public class ReservationController {
     @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private IntegrationConfig config;
+
     @POST
     @Path("/create")
     @RolesAllowed("guest")
     public Response createReservation(@HeaderParam("Authorization") String authorizationHeader,
                                       ReservationRequestDTO reservationRequestDTO) {
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/guest",
+                config.userServiceAPI() + "/auth/authorize/guest",
                 "GET",
                 authorizationHeader);
         String userEmail = (String) response.getData();
@@ -46,7 +50,7 @@ public class ReservationController {
         Reservation reservation = reservationService.createReservation(reservationRequestDTO, userEmail);
 
         GeneralResponse automaticReservationAcceptanceStatusResponse = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/user/get-automatic-reservation-acceptance-status",
+                config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                 "GET",
                 authorizationHeader
         );
@@ -72,7 +76,7 @@ public class ReservationController {
      */
     public Response getActiveReservations(@HeaderParam("Authorization") String authorizationHeader) {
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/guest",
+                config.userServiceAPI() + "/auth/authorize/guest",
                 "GET",
                 authorizationHeader);
         String userEmail = (String) response.getData();
@@ -96,7 +100,7 @@ public class ReservationController {
     public Response deactivateReservation(@HeaderParam("Authorization") String authorizationHeader,
                                           @PathParam("reservation_id") long reservationId) {
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/guest",
+                config.userServiceAPI() + "/auth/authorize/guest",
                 "GET",
                 authorizationHeader);
         String userEmail = (String) response.getData();
@@ -105,7 +109,7 @@ public class ReservationController {
         }
         Reservation reservation = reservationService.changeReservationStatus(reservationId, ReservationStatus.CANCELLED);
         GeneralResponse noCancellations = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/user/append-cancellation",
+                config.userServiceAPI() + "/user/append-cancellation",
                 "GET",
                 authorizationHeader);
         return Response
@@ -119,7 +123,7 @@ public class ReservationController {
     @RolesAllowed("host")
     public Response getAllRequestedReservations(@HeaderParam("Authorization") String authorizationHeader) {
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/host",
+                config.userServiceAPI() + "/auth/authorize/host",
                 "GET",
                 authorizationHeader);
         String userEmail = (String) response.getData();
@@ -130,7 +134,7 @@ public class ReservationController {
         List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
         for (Reservation requestedReservation: requestedReservations) {
             GeneralResponse noCancellations = microserviceCommunicator.processResponse(
-                    "http://localhost:8001/user-service/user/no-cancellations/" + requestedReservation.getGuestEmail(),
+                    config.userServiceAPI() + "/user/no-cancellations/" + requestedReservation.getGuestEmail(),
                     "GET",
                     authorizationHeader);
             reservationResponseDTOS.add(new ReservationResponseDTO(requestedReservation, (int) noCancellations.getData()));
@@ -147,7 +151,7 @@ public class ReservationController {
     public Response reject(@HeaderParam("Authorization") String authorizationHeader,
                                @PathParam("reservation_id") long reservationId) {
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/host",
+                config.userServiceAPI() + "/auth/authorize/host",
                 "GET",
                 authorizationHeader);
         String userEmail = (String) response.getData();
@@ -168,7 +172,7 @@ public class ReservationController {
     public Response accept(@HeaderParam("Authorization") String authorizationHeader,
                            @PathParam("reservation_id") long reservationId) {
         GeneralResponse response = microserviceCommunicator.processResponse(
-                "http://localhost:8001/user-service/auth/authorize/host",
+                config.userServiceAPI() + "/auth/authorize/host",
                 "GET",
                 authorizationHeader);
         String userEmail = (String) response.getData();

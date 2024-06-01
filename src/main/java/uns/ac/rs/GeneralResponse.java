@@ -2,11 +2,13 @@ package uns.ac.rs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 import java.util.Map;
 
 @Data
+@RegisterForReflection
 public class GeneralResponse<T> {
     public String message;
     public T data;

@@ -1,11 +1,13 @@
 package uns.ac.rs.integration;
 
+import uns.ac.rs.config.IntegrationConfig;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.controller.ReservationController;
@@ -64,18 +66,20 @@ public class ReservationControllerTests {
     @InjectMock
     private MicroserviceCommunicator microserviceCommunicator;
 
+    @Autowired
+    private IntegrationConfig config;
     @Test
     @Order(1)
     public void whenCreateReservationWithAutomaticReservationOn_thenReturnCreatedReservationWithAcceptedStatus() {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/guest",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt");
 
@@ -111,13 +115,13 @@ public class ReservationControllerTests {
     public void whenCreateReservationWithAutomaticAcceptanceOff_thenReturnCreatedReservationWithSentStatus() {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/guest",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt");
 
@@ -153,13 +157,13 @@ public class ReservationControllerTests {
     public void whenCreateAnotherReservationWithAutomaticAcceptanceOff_thenReturnCreatedReservationWithSentStatus() {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/guest",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt");
 
@@ -195,13 +199,13 @@ public class ReservationControllerTests {
     public void whenCreateAnotherReservationWithAutomaticAcceptanceOffWithOverlappingDates_thenReturnCreatedReservationWithSentStatus() {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/guest",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt");
 
@@ -237,7 +241,7 @@ public class ReservationControllerTests {
     public void whenGetActiveReservations_thenReturnSentOrAcceptedWithMoreThan24HoursBeforeItStarts() {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/guest",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
                         "Bearer good-jwt");
 
@@ -257,7 +261,7 @@ public class ReservationControllerTests {
     public void whenDeactivateReservation_thenChangeReservationStatusToCancelled() {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/guest",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
                         "Bearer good-jwt");
 
@@ -284,13 +288,13 @@ public class ReservationControllerTests {
     public void whenGetAllRequestedReservations_thenReturnSentReservationsWithAmountOfCancellations() {
         doReturn(new GeneralResponse("host@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/host",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/host",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(5, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/no-cancellations/guest@gmail.com",
+                .processResponse(config.userServiceAPI() + "/user/no-cancellations/guest@gmail.com",
                         "GET",
                         "Bearer good-jwt");
 
@@ -310,13 +314,13 @@ public class ReservationControllerTests {
     public void whenAcceptRequest_thenRejectRequestsInTheDateRangeAndReturnAcceptedRequest() {
         doReturn(new GeneralResponse("host@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/host",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/host",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(5, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/no-cancellations/guest@gmail.com",
+                .processResponse(config.userServiceAPI() + "/user/no-cancellations/guest@gmail.com",
                         "GET",
                         "Bearer good-jwt");
 
@@ -353,13 +357,13 @@ public class ReservationControllerTests {
     public void whenRejectReservation_thenReturnRejectedReservation() {
         doReturn(new GeneralResponse("host@gmail.com", "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/auth/authorize/host",
+                .processResponse(config.userServiceAPI() + "/auth/authorize/host",
                         "GET",
                         "Bearer good-jwt");
 
         doReturn(new GeneralResponse(5, "200"))
                 .when(microserviceCommunicator)
-                .processResponse("http://localhost:8001/user-service/user/no-cancellations/guest@gmail.com",
+                .processResponse(config.userServiceAPI() + "/user/no-cancellations/guest@gmail.com",
                         "GET",
                         "Bearer good-jwt");
 

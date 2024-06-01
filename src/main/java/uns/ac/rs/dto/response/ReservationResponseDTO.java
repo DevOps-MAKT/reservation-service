@@ -1,10 +1,12 @@
 package uns.ac.rs.dto.response;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 import uns.ac.rs.model.Reservation;
 import uns.ac.rs.model.ReservationStatus;
 
 @Data
+@RegisterForReflection
 public class ReservationResponseDTO {
 
     private long id;

@@ -24,8 +24,8 @@ services:
       - POSTGRESQL_HOST=postgres-test
       - POSTGRESQL_PORT=5432
       - POSTGRESQL_DB=reservationservicetestdb
-      - POSTGRESQL_USERNAME=postgres
-      - POSTGRESQL_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     working_dir: /workspace
     depends_on:
       - db
