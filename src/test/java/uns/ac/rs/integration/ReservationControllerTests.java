@@ -75,13 +75,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO();
         reservationRequestDTO.setAccommodationId(1L);
@@ -117,13 +119,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO();
         reservationRequestDTO.setAccommodationId(1L);
@@ -159,13 +163,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO();
         reservationRequestDTO.setAccommodationId(1L);
@@ -201,13 +207,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO();
         reservationRequestDTO.setAccommodationId(1L);
@@ -243,7 +251,8 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -263,7 +272,8 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -290,13 +300,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/host",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(5, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/no-cancellations/guest@gmail.com",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -316,13 +328,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/host",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(5, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/no-cancellations/guest@gmail.com",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         given()
                 .contentType(ContentType.JSON)
@@ -359,13 +373,15 @@ public class ReservationControllerTests {
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/host",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         doReturn(new GeneralResponse(5, "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/user/no-cancellations/guest@gmail.com",
                         "GET",
-                        "Bearer good-jwt");
+                        "Bearer good-jwt",
+                        "");
 
         given()
                 .contentType(ContentType.JSON)

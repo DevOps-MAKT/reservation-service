@@ -46,7 +46,8 @@ public class ReservationController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/auth/authorize/guest",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         String userEmail = (String) response.getData();
         if (userEmail.equals("")) {
             logger.warn("Unauthorized access for creating reservation");
@@ -59,16 +60,37 @@ public class ReservationController {
         GeneralResponse automaticReservationAcceptanceStatusResponse = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
                 "GET",
-                authorizationHeader
-        );
+                authorizationHeader,
+                "");
 
-        boolean isAutomaticReservationAcceptanceStatusActive = (boolean) automaticReservationAcceptanceStatusResponse.getData();
+
+       boolean isAutomaticReservationAcceptanceStatusActive = (boolean) automaticReservationAcceptanceStatusResponse.getData();
 
         if (isAutomaticReservationAcceptanceStatusActive) {
             logger.info("Accepting reservation - automatic reservation status is active");
             reservation = reservationService.changeReservationStatus(reservation.getId(), ReservationStatus.ACCEPTED);
         }
 
+        String receiverEmail = reservationRequestDTO.getHostEmail();
+        String notificationType = "RESERVATION_REQUESTED";
+        String senderEmail = userEmail;
+        long accommodationId = reservationRequestDTO.getAccommodationId();
+
+        String notificationBody = String.format(
+                """
+                {
+                    "receiverEmail": "%s",
+                    "notificationType": "%s",
+                    "senderEmail": "%s",
+                    "accommodationId": %d
+                }
+                """, receiverEmail, notificationType, senderEmail, accommodationId);
+
+        GeneralResponse notification = microserviceCommunicator.processResponse(
+                config.notificationServiceAPI() + "/notification/create",
+                "POST",
+                "",
+                notificationBody);
 
         return Response
                 .status(Response.Status.CREATED)
@@ -87,7 +109,8 @@ public class ReservationController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/auth/authorize/guest",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         String userEmail = (String) response.getData();
         if (userEmail.equals("")) {
             logger.warn("Unauthorized access for getting active reservations");
@@ -115,7 +138,8 @@ public class ReservationController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/auth/authorize/guest",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         String userEmail = (String) response.getData();
         if (userEmail.equals("")) {
             logger.warn("Unauthorized access for deactivating reservation");
@@ -127,8 +151,30 @@ public class ReservationController {
         GeneralResponse noCancellations = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/user/append-cancellation",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         logger.info("Successfully deactivated reservation");
+
+        String receiverEmail = reservation.getHostEmail();
+        String notificationType = "RESERVATION_CANCELLED";
+        String senderEmail = userEmail;
+        long accommodationId = reservation.getAccommodationId();
+
+        String notificationBody = String.format(
+                """
+                {
+                    "receiverEmail": "%s",
+                    "notificationType": "%s",
+                    "senderEmail": "%s",
+                    "accommodationId": %d
+                }
+                """, receiverEmail, notificationType, senderEmail, accommodationId);
+        GeneralResponse notification = microserviceCommunicator.processResponse(
+                config.notificationServiceAPI() + "/notification/create",
+                "POST",
+                "",
+                notificationBody);
+
         return Response
                 .status(Response.Status.OK)
                 .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully cancelled an active reservation"))
@@ -142,7 +188,8 @@ public class ReservationController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/auth/authorize/host",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         String userEmail = (String) response.getData();
         if (userEmail.equals("")) {
             logger.warn("Unauthorized access for getting all requested reservations");
@@ -158,7 +205,8 @@ public class ReservationController {
             GeneralResponse noCancellations = microserviceCommunicator.processResponse(
                     config.userServiceAPI() + "/user/no-cancellations/" + requestedReservation.getGuestEmail(),
                     "GET",
-                    authorizationHeader);
+                    authorizationHeader,
+                    "");
             reservationResponseDTOS.add(new ReservationResponseDTO(requestedReservation, (int) noCancellations.getData()));
         }
         logger.info("Retrieved number of cancellations for each guest");
@@ -176,7 +224,8 @@ public class ReservationController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/auth/authorize/host",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         String userEmail = (String) response.getData();
         if (userEmail.equals("")) {
             logger.warn("Unauthorized access for rejecting a reservation");
@@ -186,6 +235,26 @@ public class ReservationController {
         logger.info("Rejecting a reservation with id {}", reservationId);
         Reservation reservation = reservationService.rejectReservation(reservationId);
         logger.info("Successfully rejected a reservation with id {}", reservationId);
+
+        String receiverEmail = userEmail;
+        String notificationType = "RESERVATION_REQUEST_ANSWERED";
+        String senderEmail = reservation.getHostEmail();
+
+        String notificationBody = String.format(
+                """
+                {
+                    "receiverEmail": "%s",
+                    "notificationType": "%s",
+                    "senderEmail": "%s",
+                    "requestAccepted": %b
+                }
+                """, receiverEmail, notificationType, senderEmail, false);
+
+        GeneralResponse notification = microserviceCommunicator.processResponse(
+                config.notificationServiceAPI() + "/notification/create",
+                "POST",
+                "",
+                notificationBody);
         return Response
                 .status(Response.Status.OK)
                 .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully rejected reservation"))
@@ -200,7 +269,8 @@ public class ReservationController {
         GeneralResponse response = microserviceCommunicator.processResponse(
                 config.userServiceAPI() + "/auth/authorize/host",
                 "GET",
-                authorizationHeader);
+                authorizationHeader,
+                "");
         String userEmail = (String) response.getData();
         if (userEmail.equals("")) {
             logger.warn("Unauthorized access for accepting a reservation");
@@ -210,6 +280,28 @@ public class ReservationController {
         logger.info("Accepting a reservation with id {}", reservationId);
         Reservation reservation = reservationService.acceptReservation(reservationId);
         logger.info("Successfully accepted a reservation with id {}", reservationId);
+
+
+        String receiverEmail = userEmail;
+        String notificationType = "RESERVATION_REQUEST_ANSWERED";
+        String senderEmail = reservation.getHostEmail();
+
+        String notificationBody = String.format(
+                """
+                {
+                    "receiverEmail": "%s",
+                    "notificationType": "%s",
+                    "senderEmail": "%s",
+                    "requestAccepted": %b
+                }
+                """, receiverEmail, notificationType, senderEmail, true);
+
+        GeneralResponse notification = microserviceCommunicator.processResponse(
+                config.notificationServiceAPI() + "/notification/create",
+                "POST",
+                "",
+                notificationBody);
+
         return Response
                 .status(Response.Status.OK)
                 .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully accepted reservation"))
