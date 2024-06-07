@@ -58,7 +58,7 @@ public class ReservationController {
         logger.info("Reservation successfully created");
 
         GeneralResponse automaticReservationAcceptanceStatusResponse = microserviceCommunicator.processResponse(
-                config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
+                config.userServiceAPI() + "/user/" + reservation.getHostEmail() + "/get-automatic-reservation-acceptance-status",
                 "GET",
                 authorizationHeader,
                 "");
