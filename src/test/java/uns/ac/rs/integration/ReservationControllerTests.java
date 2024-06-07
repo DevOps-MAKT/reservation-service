@@ -80,7 +80,7 @@ public class ReservationControllerTests {
 
         doReturn(new GeneralResponse(true, "200"))
                 .when(microserviceCommunicator)
-                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/host@gmail.com/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt",
                         "");
@@ -124,7 +124,7 @@ public class ReservationControllerTests {
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/host@gmail.com/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt",
                         "");
@@ -168,7 +168,7 @@ public class ReservationControllerTests {
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/host@gmail.com/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt",
                         "");
@@ -212,7 +212,7 @@ public class ReservationControllerTests {
 
         doReturn(new GeneralResponse(false, "200"))
                 .when(microserviceCommunicator)
-                .processResponse(config.userServiceAPI() + "/user/get-automatic-reservation-acceptance-status",
+                .processResponse(config.userServiceAPI() + "/user/host@gmail.com/get-automatic-reservation-acceptance-status",
                         "GET",
                         "Bearer good-jwt",
                         "");
