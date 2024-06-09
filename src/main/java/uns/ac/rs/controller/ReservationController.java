@@ -13,12 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.dto.request.ReservationRequestDTO;
+import uns.ac.rs.dto.response.AccommodationBriefResponseDTO;
+import uns.ac.rs.dto.response.ReservationBriefResponseDTO;
 import uns.ac.rs.dto.response.ReservationResponseDTO;
 import uns.ac.rs.model.Reservation;
 import uns.ac.rs.model.ReservationStatus;
 import uns.ac.rs.service.ReservationService;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Path("/reservation")
@@ -94,7 +97,7 @@ public class ReservationController {
 
         return Response
                 .status(Response.Status.CREATED)
-                .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Reservation successfully created"))
+                .entity(new GeneralResponse<>(new ReservationBriefResponseDTO(reservation), "Reservation successfully created"))
                 .build();
     }
 
@@ -121,7 +124,13 @@ public class ReservationController {
         List<Reservation> reservations = reservationService.getActiveReservations(userEmail);
         List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
         for (Reservation reservation: reservations) {
-            reservationResponseDTOS.add(new ReservationResponseDTO(reservation));
+            GeneralResponse accommodationResponse = microserviceCommunicator.processResponse(
+                    config.accommodationServiceAPI() + "/accommodation/brief/" + reservation.getAccommodationId(),
+                    "GET",
+                    authorizationHeader,
+                    "");
+            AccommodationBriefResponseDTO accommodation = new AccommodationBriefResponseDTO((LinkedHashMap) accommodationResponse.getData());
+            reservationResponseDTOS.add(new ReservationResponseDTO(reservation, accommodation));
         }
         logger.info("Successfully retrieved active reservations for user with email {}", userEmail);
         return Response
@@ -177,7 +186,7 @@ public class ReservationController {
 
         return Response
                 .status(Response.Status.OK)
-                .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully cancelled an active reservation"))
+                .entity(new GeneralResponse<>(new ReservationBriefResponseDTO(reservation), "Successfully cancelled an active reservation"))
                 .build();
     }
 
@@ -199,7 +208,7 @@ public class ReservationController {
         logger.info("Retrieving requested reservations");
         List<Reservation> requestedReservations = reservationService.getRequestedReservations(userEmail);
         logger.info("Successfully retrieved requested reservations");
-        List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
+        List<ReservationBriefResponseDTO> reservationResponseDTOS = new ArrayList<>();
         logger.info("Retrieving number of cancellations for each guest");
         for (Reservation requestedReservation: requestedReservations) {
             GeneralResponse noCancellations = microserviceCommunicator.processResponse(
@@ -207,7 +216,7 @@ public class ReservationController {
                     "GET",
                     authorizationHeader,
                     "");
-            reservationResponseDTOS.add(new ReservationResponseDTO(requestedReservation, (int) noCancellations.getData()));
+            reservationResponseDTOS.add(new ReservationBriefResponseDTO(requestedReservation, (int) noCancellations.getData()));
         }
         logger.info("Retrieved number of cancellations for each guest");
         return Response
@@ -257,7 +266,7 @@ public class ReservationController {
                 notificationBody);
         return Response
                 .status(Response.Status.OK)
-                .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully rejected reservation"))
+                .entity(new GeneralResponse<>(new ReservationBriefResponseDTO(reservation), "Successfully rejected reservation"))
                 .build();
     }
 
@@ -304,7 +313,7 @@ public class ReservationController {
 
         return Response
                 .status(Response.Status.OK)
-                .entity(new GeneralResponse<>(new ReservationResponseDTO(reservation), "Successfully accepted reservation"))
+                .entity(new GeneralResponse<>(new ReservationBriefResponseDTO(reservation), "Successfully accepted reservation"))
                 .build();
     }
 
@@ -315,9 +324,9 @@ public class ReservationController {
         logger.info("Retrieving reservations for accommodation with id {}", accommodationId);
         List<Reservation> reservations = reservationService.findReservationsBasedOnAccommodation(accommodationId);
         logger.info("Successfully retrieved reservations for accommodation with id {}", accommodationId);
-        List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
+        List<ReservationBriefResponseDTO> reservationResponseDTOS = new ArrayList<>();
         for (Reservation reservation: reservations) {
-            reservationResponseDTOS.add(new ReservationResponseDTO(reservation));
+            reservationResponseDTOS.add(new ReservationBriefResponseDTO(reservation));
         }
 
         return Response

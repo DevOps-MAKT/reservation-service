@@ -11,9 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uns.ac.rs.GeneralResponse;
 import uns.ac.rs.MicroserviceCommunicator;
 import uns.ac.rs.controller.ReservationController;
+import uns.ac.rs.dto.AccommodationFeatureDTO;
+import uns.ac.rs.dto.LocationDTO;
 import uns.ac.rs.dto.request.ReservationRequestDTO;
+import uns.ac.rs.dto.response.AccommodationBriefResponseDTO;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -32,7 +38,7 @@ public class ReservationControllerTests {
     URL getActiveReservationsEndpoint;
 
     @TestHTTPEndpoint(ReservationController.class)
-    @TestHTTPResource("deactivate/1")
+    @TestHTTPResource("deactivate/3")
     URL deactivateReservationEndpoint;
 
     @TestHTTPEndpoint(ReservationController.class)
@@ -44,7 +50,7 @@ public class ReservationControllerTests {
     URL acceptRequestEndpoint;
 
     @TestHTTPEndpoint(ReservationController.class)
-    @TestHTTPResource("2/reject")
+    @TestHTTPResource("4/reject")
     URL rejectRequestEndpoint;
 
     @TestHTTPEndpoint(ReservationController.class)
@@ -101,7 +107,7 @@ public class ReservationControllerTests {
                 .post(createReservationEndpoint)
         .then()
                 .statusCode(201)
-                .body("data.id", equalTo(1))
+                .body("data.id", equalTo(3))
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
@@ -145,7 +151,7 @@ public class ReservationControllerTests {
                 .post(createReservationEndpoint)
         .then()
                 .statusCode(201)
-                .body("data.id", equalTo(2))
+                .body("data.id", equalTo(4))
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
@@ -189,7 +195,7 @@ public class ReservationControllerTests {
                 .post(createReservationEndpoint)
         .then()
                 .statusCode(201)
-                .body("data.id", equalTo(3))
+                .body("data.id", equalTo(5))
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
@@ -233,7 +239,7 @@ public class ReservationControllerTests {
                 .post(createReservationEndpoint)
         .then()
                 .statusCode(201)
-                .body("data.id", equalTo(4))
+                .body("data.id", equalTo(6))
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
@@ -250,6 +256,40 @@ public class ReservationControllerTests {
         doReturn(new GeneralResponse("guest@gmail.com", "200"))
                 .when(microserviceCommunicator)
                 .processResponse(config.userServiceAPI() + "/auth/authorize/guest",
+                        "GET",
+                        "Bearer good-jwt",
+                        "");
+        LinkedHashMap<String, Object> locationMap = new LinkedHashMap<>();
+        locationMap.put("country", "USA");
+        locationMap.put("city", "Springfield");
+
+        // Create list of maps for AccommodationFeatureDTO
+        List<LinkedHashMap<String, Object>> accommodationFeaturesList = new ArrayList<>();
+        LinkedHashMap<String, Object> feature1 = new LinkedHashMap<>();
+        feature1.put("feature", "Free WiFi");
+        LinkedHashMap<String, Object> feature2 = new LinkedHashMap<>();
+        feature2.put("feature", "Swimming Pool");
+        accommodationFeaturesList.add(feature1);
+        accommodationFeaturesList.add(feature2);
+
+        // Create the main map for AccommodationBriefResponseDTO
+        LinkedHashMap<String, Object> accommodationMap = new LinkedHashMap<>();
+        accommodationMap.put("id", 1L);
+        accommodationMap.put("name", "Sunshine Hotel");
+        accommodationMap.put("location", locationMap);
+        accommodationMap.put("accommodationFeatures", accommodationFeaturesList);
+        accommodationMap.put("photographURL", "http://example.com/photo.jpg");
+        accommodationMap.put("minimumNoGuests", 1);
+        accommodationMap.put("maximumNoGuests", 4);
+        accommodationMap.put("hostEmail", "host@example.com");
+        accommodationMap.put("price", 99.99);
+        accommodationMap.put("pricePerGuest", false);
+        accommodationMap.put("avgRating", 4.5);
+
+
+        doReturn(new GeneralResponse(accommodationMap, "200"))
+                .when(microserviceCommunicator)
+                .processResponse(config.accommodationServiceAPI() + "/accommodation/brief/1",
                         "GET",
                         "Bearer good-jwt",
                         "");
@@ -282,7 +322,7 @@ public class ReservationControllerTests {
                 .patch(deactivateReservationEndpoint)
         .then()
                 .statusCode(200)
-                .body("data.id", equalTo(1))
+                .body("data.id", equalTo(3))
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
@@ -349,8 +389,8 @@ public class ReservationControllerTests {
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
-                .body("data.startDate", equalTo(1740870000000L))
-                .body("data.endDate", equalTo(1741993200000L))
+                .body("data.startDate", equalTo(1735686000000L))
+                .body("data.endDate", equalTo(1736290800000L))
                 .body("data.noGuests", equalTo(5))
                 .body("data.status", equalTo("ACCEPTED"))
                 .body("message", equalTo("Successfully accepted reservation"));
@@ -362,7 +402,7 @@ public class ReservationControllerTests {
                 .get(getRequestedReservationsEndpoint)
         .then()
                 .statusCode(200)
-                .body("data.size()", equalTo(1))
+                .body("data.size()", equalTo(3))
                 .body("message", equalTo("Successfully retrieved requested reservations"));
     }
 
@@ -390,7 +430,7 @@ public class ReservationControllerTests {
                 .patch(rejectRequestEndpoint)
         .then()
                 .statusCode(200)
-                .body("data.id", equalTo(2))
+                .body("data.id", equalTo(4))
                 .body("data.accommodationId", equalTo(1))
                 .body("data.hostEmail", equalTo("host@gmail.com"))
                 .body("data.guestEmail", equalTo("guest@gmail.com"))
@@ -407,7 +447,7 @@ public class ReservationControllerTests {
                 .get(getRequestedReservationsEndpoint)
         .then()
                 .statusCode(200)
-                .body("data.size()", equalTo(0))
+                .body("data.size()", equalTo(2))
                 .body("message", equalTo("Successfully retrieved requested reservations"));
     }
 
