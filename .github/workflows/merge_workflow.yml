@@ -2,7 +2,7 @@ name: 'Merge workflow'
 on:
   push:
     branches:
-      - 'main'
+      - 'cicd/kaniko-build'
       - 'develop'
 
 concurrency:
@@ -103,10 +103,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
+      - name: Kaniko Docker Image Build
+        uses: aevea/action-kaniko@master
         with:
-          context: .
-          file: ./src/main/docker/Dockerfile.multistage
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGE_NAME }}:${{ needs.versioning.outputs.new_version }}
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGE_NAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          cache: true
+          tag: ${{ needs.versioning.outputs.new_version }}
+          build_file: ./src/main/docker/Dockerfile.multistage
