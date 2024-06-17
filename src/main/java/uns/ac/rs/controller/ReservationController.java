@@ -395,4 +395,38 @@ public class ReservationController {
                 .build();
     }
 
+    @GET
+    @Path("/past-reservations")
+    @RolesAllowed("guest")
+    public Response getPastReservations(@HeaderParam("Authorization") String authorizationHeader) {
+        GeneralResponse response = microserviceCommunicator.processResponse(
+                config.userServiceAPI() + "/auth/authorize/guest",
+                "GET",
+                authorizationHeader,
+                "");
+        String userEmail = (String) response.getData();
+        if (userEmail.equals("")) {
+            logger.warn("Unauthorized access for getting active reservations");
+            return Response.status(Response.Status.UNAUTHORIZED).entity(response).build();
+        }
+
+        logger.info("Retrieving past reservations for user with email {}", userEmail);
+        List<Reservation> reservations = reservationService.getPastReservations(userEmail);
+        List<ReservationResponseDTO> reservationResponseDTOS = new ArrayList<>();
+        for (Reservation reservation: reservations) {
+            GeneralResponse accommodationResponse = microserviceCommunicator.processResponse(
+                    config.accommodationServiceAPI() + "/accommodation/brief/" + reservation.getAccommodationId(),
+                    "GET",
+                    authorizationHeader,
+                    "");
+            AccommodationBriefResponseDTO accommodation = new AccommodationBriefResponseDTO((LinkedHashMap) accommodationResponse.getData());
+            reservationResponseDTOS.add(new ReservationResponseDTO(reservation, accommodation));
+        }
+        logger.info("Successfully retrieved past reservations for user with email {}", userEmail);
+        return Response
+                .status(Response.Status.OK)
+                .entity(new GeneralResponse<>(reservationResponseDTOS, "Successfully retrieved past reservations"))
+                .build();
+    }
+
 }
