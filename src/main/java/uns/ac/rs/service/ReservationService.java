@@ -1,7 +1,6 @@
 package uns.ac.rs.service;
 
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uns.ac.rs.dto.request.ReservationRequestDTO;
@@ -36,7 +35,7 @@ public class ReservationService {
     public List<Reservation> getActiveReservations(String guestEmail) {
         long todaysMiliseconds = Instant.now().toEpochMilli();
         List<Reservation> activeReservations = reservationRepository
-                .findByGuestEmailAndStatusAndEndDate(guestEmail,
+                .findByGuestEmailAndStatusAndEndDateAfter(guestEmail,
                         ReservationStatus.SENT,
                         ReservationStatus.ACCEPTED,
                         todaysMiliseconds);
@@ -127,5 +126,14 @@ public class ReservationService {
 
     private boolean areDatesContainingOriginalDates(long startDate, long endDate, long originalStartDate, long originalEndDate) {
         return startDate <= originalStartDate && endDate >= originalEndDate;
+    }
+
+    public List<Reservation> getPastReservations(String guestEmail) {
+        long todaysMiliseconds = Instant.now().toEpochMilli();
+        return reservationRepository
+                .findByGuestEmailAndStatusAndEndDateBefore(guestEmail,
+                        ReservationStatus.SENT,
+                        ReservationStatus.ACCEPTED,
+                        todaysMiliseconds);
     }
 }

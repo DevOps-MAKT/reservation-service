@@ -90,7 +90,7 @@ public class ReservationServiceTests {
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
 
-        when(reservationRepository.findByGuestEmailAndStatusAndEndDate(
+        when(reservationRepository.findByGuestEmailAndStatusAndEndDateAfter(
                 eq("guest@gmail.com"),
                 eq(ReservationStatus.SENT),
                 eq(ReservationStatus.ACCEPTED),

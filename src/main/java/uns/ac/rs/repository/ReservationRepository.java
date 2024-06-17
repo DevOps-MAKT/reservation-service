@@ -10,8 +10,12 @@ import java.util.List;
 @Repository
 public class ReservationRepository implements PanacheRepository<Reservation> {
 
-    public List<Reservation> findByGuestEmailAndStatusAndEndDate(String guestEmail, ReservationStatus status1, ReservationStatus status2, long endDate) {
+    public List<Reservation> findByGuestEmailAndStatusAndEndDateAfter(String guestEmail, ReservationStatus status1, ReservationStatus status2, long endDate) {
         return list("guestEmail = ?1 and (status = ?2 or status = ?3) and endDate > ?4", guestEmail, status1, status2, endDate);
+    }
+
+    public List<Reservation> findByGuestEmailAndStatusAndEndDateBefore(String guestEmail, ReservationStatus status1, ReservationStatus status2, long endDate) {
+        return list("guestEmail = ?1 and (status = ?2 or status = ?3) and endDate < ?4", guestEmail, status1, status2, endDate);
     }
 
     public List<Reservation> findByHostEmailAndStatus(String hostEmail, ReservationStatus status) {
