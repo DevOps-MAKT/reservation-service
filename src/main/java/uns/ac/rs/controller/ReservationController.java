@@ -245,7 +245,7 @@ public class ReservationController {
         Reservation reservation = reservationService.rejectReservation(reservationId);
         logger.info("Successfully rejected a reservation with id {}", reservationId);
 
-        String receiverEmail = userEmail;
+        String receiverEmail = reservation.getGuestEmail();
         String notificationType = "RESERVATION_REQUEST_ANSWERED";
         String senderEmail = reservation.getHostEmail();
 
@@ -291,7 +291,7 @@ public class ReservationController {
         logger.info("Successfully accepted a reservation with id {}", reservationId);
 
 
-        String receiverEmail = userEmail;
+        String receiverEmail = reservation.getGuestEmail();
         String notificationType = "RESERVATION_REQUEST_ANSWERED";
         String senderEmail = reservation.getHostEmail();
 
